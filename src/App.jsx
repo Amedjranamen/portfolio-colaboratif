@@ -13,16 +13,18 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import { auth, db } from "./firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { auth, db, storage } from "./firebase";
 
 const MEMBERS = [
   {
     id: "sarah",
-    name: "Sarah N’Diaye",
-    role: "Brand & UX Designer",
-    email: "sarah@equipe.com",
-    photo:
-      "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=500&q=80",
+    name: "AMEDJRANA MBOULA Emmanuel Noé",
+    role: "Développeur web",
+    email: "amedjrananoe@gmail.com",
+    photo: "/members/sarah.jpg",
+    profile: "Développeur web passionné avec 5 ans d'expérience dans la création d'applications modernes et performantes. Spécialisé en React et Node.js.",
+    skills: ["React", "Node.js", "JavaScript", "TypeScript", "Firebase", "MongoDB"],
   },
   {
     id: "marc",
@@ -31,6 +33,8 @@ const MEMBERS = [
     email: "marc@equipe.com",
     photo:
       "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=500&q=80",
+    profile: "Expert en interfaces utilisateur avec un œil pour le détail. Transforme les maquettes en expériences web fluides et accessibles.",
+    skills: ["HTML/CSS", "JavaScript", "Vue.js", "Tailwind CSS", "Animation CSS", "Responsive Design"],
   },
   {
     id: "ines",
@@ -39,6 +43,8 @@ const MEMBERS = [
     email: "ines@equipe.com",
     photo:
       "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=500&q=80",
+    profile: "Designer centrée sur l'utilisateur. Crée des produits digitaux intuitifs en alliant esthétique et fonctionnalité.",
+    skills: ["Figma", "UI/UX Design", "Prototypage", "Design System", "Recherche Utilisateur", "Adobe XD"],
   },
   {
     id: "lucas",
@@ -47,6 +53,8 @@ const MEMBERS = [
     email: "lucas@equipe.com",
     photo:
       "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=500&q=80",
+    profile: "Architecte full-stack capable de gérer l'ensemble d'un projet, de la base de données à l'interface. Passionné par les solutions scalables.",
+    skills: ["Python", "Django", "React", "PostgreSQL", "AWS", "Docker", "API REST"],
   },
   {
     id: "amelie",
@@ -55,6 +63,8 @@ const MEMBERS = [
     email: "amelie@equipe.com",
     photo:
       "https://images.unsplash.com/photo-1548142813-c348350df52b?auto=format&fit=crop&w=500&q=80",
+    profile: "Donne vie aux interfaces avec des animations captivantes. Spécialiste en motion design pour web et applications mobiles.",
+    skills: ["After Effects", "Lottie", "Animation UI", "Cinema 4D", "Principle", "SVG Animation"],
   },
 ];
 
@@ -81,6 +91,8 @@ export default function App() {
   const [editingId, setEditingId] = useState(null);
   const [authMode, setAuthMode] = useState("login");
   const [authForm, setAuthForm] = useState({ email: "", password: "" });
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const memberByEmail = useMemo(() => {
     const map = new Map();
@@ -158,35 +170,65 @@ export default function App() {
     await signOut(auth);
     setFormData(emptyForm);
     setEditingId(null);
+    setSelectedFile(null);
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+    }
+  };
+
+  const uploadFile = async (file, memberId) => {
+    const fileName = `${Date.now()}_${file.name}`;
+    const storageRef = ref(storage, `members/${memberId}/projects/${fileName}`);
+    await uploadBytes(storageRef, file);
+    return getDownloadURL(storageRef);
   };
 
   const handleProjectSubmit = async (event) => {
     event.preventDefault();
     if (!currentMember) return;
 
-    const payload = {
-      title: formData.title.trim(),
-      description: formData.description.trim(),
-      mediaUrl: formData.mediaUrl.trim(),
-      externalUrl: formData.externalUrl.trim(),
-      updatedAt: new Date().toISOString(),
-    };
+    setUploading(true);
+    let mediaUrl = formData.mediaUrl.trim();
 
-    if (editingId) {
-      await updateDoc(
-        doc(db, "members", currentMember.id, "projects", editingId),
-        payload
-      );
-    } else {
-      await addDoc(collection(db, "members", currentMember.id, "projects"), {
-        ...payload,
-        createdAt: new Date().toISOString(),
-      });
+    try {
+      if (selectedFile) {
+        mediaUrl = await uploadFile(selectedFile, currentMember.id);
+      }
+
+      const payload = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        mediaUrl,
+        externalUrl: formData.externalUrl.trim(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      if (editingId) {
+        await updateDoc(
+          doc(db, "members", currentMember.id, "projects", editingId),
+          payload
+        );
+      } else {
+        await addDoc(collection(db, "members", currentMember.id, "projects"), {
+          ...payload,
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      await refreshMemberProjects(currentMember.id);
+      setFormData(emptyForm);
+      setEditingId(null);
+      setSelectedFile(null);
+    } catch (error) {
+      console.error("Erreur upload:", error);
+      alert("Erreur lors de l'upload du fichier. Vérifiez Firebase Storage.");
+    } finally {
+      setUploading(false);
     }
-
-    await refreshMemberProjects(currentMember.id);
-    setFormData(emptyForm);
-    setEditingId(null);
   };
 
   const handleEdit = (project) => {
@@ -245,9 +287,15 @@ export default function App() {
           {MEMBERS.map((member) => (
             <article className="member-card" key={member.id}>
               <img src={member.photo} alt={member.name} />
-              <div>
+              <div className="member-info">
                 <h3>{member.name}</h3>
-                <p>{member.role}</p>
+                <p className="member-role">{member.role}</p>
+                <p className="member-profile">{member.profile}</p>
+                <div className="member-skills">
+                  {member.skills.map((skill) => (
+                    <span key={skill} className="skill-badge">{skill}</span>
+                  ))}
+                </div>
               </div>
             </article>
           ))}
@@ -433,6 +481,17 @@ export default function App() {
                   />
                 </label>
                 <label>
+                  Ou importer un fichier (image/vidéo)
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    onChange={handleFileChange}
+                  />
+                  {selectedFile ? (
+                    <span className="file-selected">Fichier: {selectedFile.name}</span>
+                  ) : null}
+                </label>
+                <label>
                   Lien externe (optionnel)
                   <input
                     type="url"
@@ -445,8 +504,12 @@ export default function App() {
                     }
                   />
                 </label>
-                <button type="submit">
-                  {editingId ? "Mettre à jour" : "Ajouter le projet"}
+                <button type="submit" disabled={uploading}>
+                  {uploading
+                    ? "Upload en cours..."
+                    : editingId
+                    ? "Mettre à jour"
+                    : "Ajouter le projet"}
                 </button>
                 {editingId ? (
                   <button
@@ -455,6 +518,7 @@ export default function App() {
                     onClick={() => {
                       setEditingId(null);
                       setFormData(emptyForm);
+                      setSelectedFile(null);
                     }}
                   >
                     Annuler
