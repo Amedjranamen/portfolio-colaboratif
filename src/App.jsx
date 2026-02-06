@@ -19,8 +19,8 @@ const MEMBERS = [
   },
   {
     id: "marc",
-    name: "Marc Dupont",
-    role: "Développeur Frontend",
+    name: "GOMA MBA Delva david",
+    role: "Développeur Fullstack",
     email: "marc@equipe.com",
     photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=500&q=80",
     profile: "Expert en interfaces utilisateur avec un œil pour le détail. Transforme les maquettes en expériences web fluides et accessibles.",
@@ -28,7 +28,7 @@ const MEMBERS = [
   },
   {
     id: "ines",
-    name: "Inès Hawa",
+    name: "Naazil ibouraima",
     role: "Product Designer",
     email: "ines@equipe.com",
     photo: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=500&q=80",
@@ -37,8 +37,8 @@ const MEMBERS = [
   },
   {
     id: "lucas",
-    name: "Lucas Pereira",
-    role: "Développeur Full-stack",
+    name: "MOUNGONGA KOUMBA Dani-Thérence",
+    role: "Développeur ",
     email: "lucas@equipe.com",
     photo: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=500&q=80",
     profile: "Architecte full-stack capable de gérer l'ensemble d'un projet, de la base de données à l'interface. Passionné par les solutions scalables.",
@@ -46,11 +46,11 @@ const MEMBERS = [
   },
   {
     id: "amelie",
-    name: "Amélie Benali",
-    role: "Motion Designer",
+    name: "guibotsi bohono freddy landry ",
+    role: "Développeur",
     email: "amelie@equipe.com",
     photo: "https://images.unsplash.com/photo-1548142813-c348350df52b?auto=format&fit=crop&w=500&q=80",
-    profile: "Donne vie aux interfaces avec des animations captivantes. Spécialiste en motion design pour web et applications mobiles.",
+    profile: "Donné vie aux interfaces avec des animations captivantes. Spécialiste en motion design pour web et applications mobiles.",
     skills: ["After Effects", "Lottie", "Animation UI", "Cinema 4D", "Principle", "SVG Animation"],
   },
 ];
@@ -71,7 +71,7 @@ const INITIAL_PROJECTS = {
   marc: [
     {
       id: "proj-2",
-      title: "Dashboard Analytics",
+      title: "VACILOC",
       description: "Dashboard de visualisation de données avec graphiques interactifs.",
       mediaUrl: "https://res.cloudinary.com/dxaxwiqat/image/upload/v1700000000/teamfolio/marc/dashboard.jpg",
       externalUrl: "",
