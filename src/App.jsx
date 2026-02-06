@@ -84,7 +84,7 @@ const INITIAL_PROJECTS = {
       title: "IUFMES",
       description: "Ce site vitrine présente l’université, ses formations et ses valeurs. Il met en avant les filières, les programmes académiques et la vie universitaire. Les visiteurs peuvent découvrir les informations essentielles sur l’établissement. Le site offre une navigation simple et un design moderne. Il facilite la communication entre l’université et le public.",
       mediaUrl: "https://res.cloudinary.com/dxaxwiqat/video/upload/v1770392023/WhatsApp_Video_2026-02-06_at_15.19.12_kk8v73.mp4",
-      externalUrl: "www.iufme.com",
+      externalUrl: "www.iufme.net",
       createdAt: "2024-02-01T14:30:00.000Z",
       updatedAt: "2024-02-01T14:30:00.000Z",
   },
