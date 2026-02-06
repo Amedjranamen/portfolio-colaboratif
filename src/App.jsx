@@ -77,7 +77,8 @@ const emptyForm = {
 const getMediaType = (url) => {
   if (!url) return "";
   const lower = url.toLowerCase();
-  if (lower.match(/\.(mp4|webm|ogg)$/)) return "video";
+  if (lower.includes("/video/upload/")) return "video";
+  if (lower.match(/\.(mp4|webm|ogg)(\?.*)?$/)) return "video";
   return "image";
 };
 
@@ -90,8 +91,6 @@ export default function App() {
   const [editingId, setEditingId] = useState(null);
   const [authMode, setAuthMode] = useState("login");
   const [authForm, setAuthForm] = useState({ email: "", password: "" });
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
 
   const memberByEmail = useMemo(() => {
     const map = new Map();
@@ -136,12 +135,13 @@ export default function App() {
     const snapshot = await getDocs(
       collection(db, "members", memberId, "projects")
     );
+    const projects = snapshot.docs.map((docSnap) => ({
+      id: docSnap.id,
+      ...docSnap.data(),
+    }));
     setProjectsByMember((prev) => ({
       ...prev,
-      [memberId]: snapshot.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...docSnap.data(),
-      })),
+      [memberId]: projects,
     }));
   };
 
@@ -169,87 +169,63 @@ export default function App() {
     await signOut(auth);
     setFormData(emptyForm);
     setEditingId(null);
-    setSelectedFile(null);
-  };
-
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-    }
-  };
-
-  const uploadFile = async (file, memberId) => {
-    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
-
-    if (!cloudName || !uploadPreset) {
-      throw new Error("Missing Cloudinary env vars");
-    }
-
-    const url = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
-    const form = new FormData();
-    form.append("file", file);
-    form.append("upload_preset", uploadPreset);
-    form.append("folder", `teamfolio/${memberId}`);
-
-    const res = await fetch(url, {
-      method: "POST",
-      body: form,
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(text || "Cloudinary upload failed");
-    }
-
-    const data = await res.json();
-    return data.secure_url;
   };
 
   const handleProjectSubmit = async (event) => {
     event.preventDefault();
     if (!currentMember) return;
 
-    setUploading(true);
-    let mediaUrl = formData.mediaUrl.trim();
+    const payload = {
+      title: formData.title.trim(),
+      description: formData.description.trim(),
+      mediaUrl: formData.mediaUrl.trim(),
+      externalUrl: formData.externalUrl.trim(),
+      updatedAt: new Date().toISOString(),
+    };
 
     try {
-      if (selectedFile) {
-        mediaUrl = await uploadFile(selectedFile, currentMember.id);
-      }
-
-      const payload = {
-        title: formData.title.trim(),
-        description: formData.description.trim(),
-        mediaUrl,
-        externalUrl: formData.externalUrl.trim(),
-        updatedAt: new Date().toISOString(),
-      };
-
       if (editingId) {
         await updateDoc(
           doc(db, "members", currentMember.id, "projects", editingId),
           payload
         );
+
+        setProjectsByMember((prev) => {
+          const existing = prev[currentMember.id] || [];
+          return {
+            ...prev,
+            [currentMember.id]: existing.map((project) =>
+              project.id === editingId ? { ...project, ...payload } : project
+            ),
+          };
+        });
       } else {
-        await addDoc(collection(db, "members", currentMember.id, "projects"), {
-          ...payload,
-          createdAt: new Date().toISOString(),
+        const docRef = await addDoc(
+          collection(db, "members", currentMember.id, "projects"),
+          {
+            ...payload,
+            createdAt: new Date().toISOString(),
+          }
+        );
+
+        setProjectsByMember((prev) => {
+          const existing = prev[currentMember.id] || [];
+          return {
+            ...prev,
+            [currentMember.id]: [
+              { id: docRef.id, ...payload, createdAt: new Date().toISOString() },
+              ...existing,
+            ],
+          };
         });
       }
 
       await refreshMemberProjects(currentMember.id);
       setFormData(emptyForm);
       setEditingId(null);
-      setSelectedFile(null);
     } catch (error) {
-      console.error("Erreur upload:", error);
-      alert(
-        "Erreur lors de l'upload du fichier. Vérifiez Cloudinary (upload preset unsigned + env)."
-      );
-    } finally {
-      setUploading(false);
+      console.error("Erreur:", error);
+      alert("Erreur lors de la sauvegarde.");
     }
   };
 
@@ -351,10 +327,13 @@ export default function App() {
                       {project.mediaUrl ? (
                         getMediaType(project.mediaUrl) === "video" ? (
                           <video
-                            src={project.mediaUrl}
                             controls
+                            preload="metadata"
+                            playsInline
                             className="project-media"
-                          />
+                          >
+                            <source src={project.mediaUrl} type="video/mp4" />
+                          </video>
                         ) : (
                           <img
                             src={project.mediaUrl}
@@ -490,7 +469,7 @@ export default function App() {
                   />
                 </label>
                 <label>
-                  Image ou vidéo (URL)
+                  Image ou vidéo (URL Cloudinary)
                   <input
                     type="url"
                     value={formData.mediaUrl}
@@ -500,18 +479,8 @@ export default function App() {
                         mediaUrl: event.target.value,
                       }))
                     }
+                    placeholder="https://res.cloudinary.com/..."
                   />
-                </label>
-                <label>
-                  Ou importer un fichier (image/vidéo)
-                  <input
-                    type="file"
-                    accept="image/*,video/*"
-                    onChange={handleFileChange}
-                  />
-                  {selectedFile ? (
-                    <span className="file-selected">Fichier: {selectedFile.name}</span>
-                  ) : null}
                 </label>
                 <label>
                   Lien externe (optionnel)
@@ -526,12 +495,8 @@ export default function App() {
                     }
                   />
                 </label>
-                <button type="submit" disabled={uploading}>
-                  {uploading
-                    ? "Upload en cours..."
-                    : editingId
-                    ? "Mettre à jour"
-                    : "Ajouter le projet"}
+                <button type="submit">
+                  {editingId ? "Mettre à jour" : "Ajouter le projet"}
                 </button>
                 {editingId ? (
                   <button
@@ -540,7 +505,6 @@ export default function App() {
                     onClick={() => {
                       setEditingId(null);
                       setFormData(emptyForm);
-                      setSelectedFile(null);
                     }}
                   >
                     Annuler
