@@ -1,19 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  updateDoc,
-} from "firebase/firestore";
-import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import { auth, db } from "./firebase";
+import { auth } from "./firebase";
 
 const MEMBERS = [
   {
@@ -30,8 +22,7 @@ const MEMBERS = [
     name: "Marc Dupont",
     role: "Développeur Frontend",
     email: "marc@equipe.com",
-    photo:
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=500&q=80",
+    photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=500&q=80",
     profile: "Expert en interfaces utilisateur avec un œil pour le détail. Transforme les maquettes en expériences web fluides et accessibles.",
     skills: ["HTML/CSS", "JavaScript", "Vue.js", "Tailwind CSS", "Animation CSS", "Responsive Design"],
   },
@@ -40,8 +31,7 @@ const MEMBERS = [
     name: "Inès Hawa",
     role: "Product Designer",
     email: "ines@equipe.com",
-    photo:
-      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=500&q=80",
+    photo: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=500&q=80",
     profile: "Designer centrée sur l'utilisateur. Crée des produits digitaux intuitifs en alliant esthétique et fonctionnalité.",
     skills: ["Figma", "UI/UX Design", "Prototypage", "Design System", "Recherche Utilisateur", "Adobe XD"],
   },
@@ -50,8 +40,7 @@ const MEMBERS = [
     name: "Lucas Pereira",
     role: "Développeur Full-stack",
     email: "lucas@equipe.com",
-    photo:
-      "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=500&q=80",
+    photo: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=500&q=80",
     profile: "Architecte full-stack capable de gérer l'ensemble d'un projet, de la base de données à l'interface. Passionné par les solutions scalables.",
     skills: ["Python", "Django", "React", "PostgreSQL", "AWS", "Docker", "API REST"],
   },
@@ -60,12 +49,40 @@ const MEMBERS = [
     name: "Amélie Benali",
     role: "Motion Designer",
     email: "amelie@equipe.com",
-    photo:
-      "https://images.unsplash.com/photo-1548142813-c348350df52b?auto=format&fit=crop&w=500&q=80",
+    photo: "https://images.unsplash.com/photo-1548142813-c348350df52b?auto=format&fit=crop&w=500&q=80",
     profile: "Donne vie aux interfaces avec des animations captivantes. Spécialiste en motion design pour web et applications mobiles.",
     skills: ["After Effects", "Lottie", "Animation UI", "Cinema 4D", "Principle", "SVG Animation"],
   },
 ];
+
+// Projets en dur dans le code - modifiez ici pour ajouter/modifier des projets
+const INITIAL_PROJECTS = {
+  sarah: [
+    {
+      id: "proj-1",
+      title: "IMMOCO",
+      description: "Cette application immobilière permet de consulter, publier et gérer des biens immobiliers facilement.\nElle offre une interface moderne et intuitive adaptée aux utilisateurs.\nLes agents et propriétaires peuvent ajouter des annonces avec descriptions et images.\nLes clients peuvent rechercher des biens selon leurs besoins.\nL’application simplifie et digitalise la gestion immobilière.",
+      mediaUrl: "https://res.cloudinary.com/dxaxwiqat/video/upload/v1770370099/Enregistrement_de_l_%C3%A9cran_2026-02-06_081222_h57ecw.mp4",
+      externalUrl: "https://immoco.vercel.app/",
+      createdAt: "2024-01-15T10:00:00.000Z",
+      updatedAt: "2024-01-15T10:00:00.000Z",
+    },
+  ],
+  marc: [
+    {
+      id: "proj-2",
+      title: "Dashboard Analytics",
+      description: "Dashboard de visualisation de données avec graphiques interactifs.",
+      mediaUrl: "https://res.cloudinary.com/dxaxwiqat/image/upload/v1700000000/teamfolio/marc/dashboard.jpg",
+      externalUrl: "",
+      createdAt: "2024-02-01T14:30:00.000Z",
+      updatedAt: "2024-02-01T14:30:00.000Z",
+    },
+  ],
+  ines: [],
+  lucas: [],
+  amelie: [],
+};
 
 const emptyForm = {
   title: "",
@@ -111,32 +128,10 @@ export default function App() {
     return () => unsub();
   }, []);
 
+  // Initialisation des projets depuis les données statiques
   useEffect(() => {
-    const unsubscribers = MEMBERS.map((member) => {
-      return onSnapshot(
-        collection(db, "members", member.id, "projects"),
-        (snapshot) => {
-          setProjectsByMember((prev) => ({
-            ...prev,
-            [member.id]: snapshot.docs.map((docSnap) => ({
-              id: docSnap.id,
-              ...docSnap.data(),
-            })),
-          }));
-        },
-        (error) => {
-          console.error("Firestore error:", error);
-        }
-      );
-    });
-
-    return () => unsubscribers.forEach((unsub) => unsub());
+    setProjectsByMember(INITIAL_PROJECTS);
   }, []);
-
-  const refreshMemberProjects = (memberId) => {
-    // No-op: onSnapshot handles real-time updates automatically
-    console.log("Projects auto-updated via onSnapshot");
-  };
 
   const handleAuthSubmit = async (event) => {
     event.preventDefault();
@@ -168,21 +163,17 @@ export default function App() {
     event.preventDefault();
     if (!currentMember) return;
 
-    const payload = {
-      title: formData.title.trim(),
-      description: formData.description.trim(),
-      mediaUrl: formData.mediaUrl.trim(),
-      externalUrl: formData.externalUrl.trim(),
-      updatedAt: new Date().toISOString(),
-    };
-
     try {
-      if (editingId) {
-        await updateDoc(
-          doc(db, "members", currentMember.id, "projects", editingId),
-          payload
-        );
+      const payload = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        mediaUrl: formData.mediaUrl.trim(),
+        externalUrl: formData.externalUrl.trim(),
+        updatedAt: new Date().toISOString(),
+      };
 
+      if (editingId) {
+        // Modification d'un projet existant
         setProjectsByMember((prev) => {
           const existing = prev[currentMember.id] || [];
           return {
@@ -193,20 +184,14 @@ export default function App() {
           };
         });
       } else {
-        const docRef = await addDoc(
-          collection(db, "members", currentMember.id, "projects"),
-          {
-            ...payload,
-            createdAt: new Date().toISOString(),
-          }
-        );
-
+        // Ajout d'un nouveau projet
+        const newId = `proj-${Date.now()}`;
         setProjectsByMember((prev) => {
           const existing = prev[currentMember.id] || [];
           return {
             ...prev,
             [currentMember.id]: [
-              { id: docRef.id, ...payload, createdAt: new Date().toISOString() },
+              { id: newId, ...payload, createdAt: new Date().toISOString() },
               ...existing,
             ],
           };
@@ -231,10 +216,15 @@ export default function App() {
     });
   };
 
-  const handleDelete = async (projectId) => {
+  const handleDelete = (projectId) => {
     if (!currentMember) return;
-    await deleteDoc(doc(db, "members", currentMember.id, "projects", projectId));
-    await refreshMemberProjects(currentMember.id);
+    setProjectsByMember((prev) => {
+      const existing = prev[currentMember.id] || [];
+      return {
+        ...prev,
+        [currentMember.id]: existing.filter((project) => project.id !== projectId),
+      };
+    });
   };
 
   return (
