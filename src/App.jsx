@@ -31,7 +31,7 @@ const MEMBERS = [
     name: "Naazil ibouraima",
     role: "Product Designer",
     email: "ines@equipe.com",
-    photo: "",
+    photo: "/members/WhatsApp Image 2026-02-06 at 17.10.20.jpeg",
     profile: "Designer centrée sur l'utilisateur. Crée des produits digitaux intuitifs en alliant esthétique et fonctionnalité.",
     skills: ["Figma", "UI/UX Design", "Prototypage", "Design System", "Recherche Utilisateur", "Adobe XD"],
   },
@@ -72,7 +72,7 @@ const INITIAL_PROJECTS = {
     {
       id: "proj-2",
       title: "VACILOC",
-      description: "Dashboard de visualisation de données avec graphiques interactifs.",
+      description: "Ce dashboard permet de visualiser et analyser des données de manière claire et interactive. Il intègre des graphiques dynamiques facilitant la compréhension des tendances. Les utilisateurs peuvent filtrer et explorer les données en temps réel. L’interface est moderne, intuitive et responsive. L’outil aide à la prise de décision basée sur les données.",
       mediaUrl: "https://res.cloudinary.com/dxaxwiqat/video/upload/v1770392022/WhatsApp_Video_2026-02-06_at_15.14.11_fay2jj.mp4",
       externalUrl: "www.vaciloc.com",
       createdAt: "2024-02-01T14:30:00.000Z",
@@ -82,7 +82,7 @@ const INITIAL_PROJECTS = {
   ines: [
   {   id: "proj-3",
       title: "IUFMES",
-      description: "Site vitrine",
+      description: "Ce site vitrine présente l’université, ses formations et ses valeurs. Il met en avant les filières, les programmes académiques et la vie universitaire. Les visiteurs peuvent découvrir les informations essentielles sur l’établissement. Le site offre une navigation simple et un design moderne. Il facilite la communication entre l’université et le public.",
       mediaUrl: "https://res.cloudinary.com/dxaxwiqat/video/upload/v1770392023/WhatsApp_Video_2026-02-06_at_15.19.12_kk8v73.mp4",
       externalUrl: "www.iufme.com",
       createdAt: "2024-02-01T14:30:00.000Z",
