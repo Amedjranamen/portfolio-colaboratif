@@ -99,7 +99,16 @@ const INITIAL_PROJECTS = {
       updatedAt: "2024-02-01T14:30:00.000Z",
   },
   ],
-  amelie: [],
+  amelie: [
+    {   id: "proj-5",
+      title: "MEDICAL RDV",
+      description: "Cette application permet de prendre et gérer des rendez-vous médicaux facilement. Les patients peuvent choisir un médecin selon leur disponibilité. Les professionnels de santé organisent leur planning en temps réel. L’interface est intuitive et accessible à tous. L'application améliore la coordination entre patients et médecins.",
+      mediaUrl: "https://res.cloudinary.com/dxaxwiqat/video/upload/v1770415244/VID-20260206-WA0051_kezvfj.mp4",
+      externalUrl: "https://soutenance-17-24.onrender.com/",
+      createdAt: "2024-02-01T14:30:00.000Z",
+      updatedAt: "2024-02-01T14:30:00.000Z",
+  },
+  ],
 };
 
 const emptyForm = {
