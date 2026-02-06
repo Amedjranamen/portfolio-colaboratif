@@ -14,7 +14,7 @@ const MEMBERS = [
     role: "Développeur web",
     email: "amedjrananoe@gmail.com",
     photo: "/members/sarah.jpg",
-    profile: "Développeur web passionné avec 5 ans d'expérience dans la création d'applications modernes et performantes. Spécialisé en React et Node.js.",
+    profile: "Je suis un étudiant en troisième année de génie-informatique avec quelques connaissances en réseau et enprogrammation. A la recherche d’un stage pour ma soutenance et dans le but est d’approfondir mes connaissances ainsi que d’acquérir une expérience enentreprise.",
     skills: ["React", "Node.js", "JavaScript", "TypeScript", "Firebase", "MongoDB"],
   },
   {
@@ -51,7 +51,7 @@ const MEMBERS = [
     email: "amelie@equipe.com",
     photo: "https://images.unsplash.com/photo-1548142813-c348350df52b?auto=format&fit=crop&w=500&q=80",
     profile: "Donné vie aux interfaces avec des animations captivantes. Spécialiste en motion design pour web et applications mobiles.",
-    skills: ["After Effects", "Lottie", "Animation UI", "Cinema 4D", "Principle", "SVG Animation"],
+    skills: ["Python", "Django", "React", "PostgreSQL", "SVG Animation"],
   },
 ];
 
@@ -73,13 +73,22 @@ const INITIAL_PROJECTS = {
       id: "proj-2",
       title: "VACILOC",
       description: "Dashboard de visualisation de données avec graphiques interactifs.",
-      mediaUrl: "https://res.cloudinary.com/dxaxwiqat/image/upload/v1700000000/teamfolio/marc/dashboard.jpg",
-      externalUrl: "",
+      mediaUrl: "https://res.cloudinary.com/dxaxwiqat/video/upload/v1770392022/WhatsApp_Video_2026-02-06_at_15.14.11_fay2jj.mp4",
+      externalUrl: "www.vaciloc.com",
       createdAt: "2024-02-01T14:30:00.000Z",
       updatedAt: "2024-02-01T14:30:00.000Z",
     },
   ],
-  ines: [],
+  ines: [
+  {   id: "proj-3",
+      title: "IUFMES",
+      description: "Site vitrine",
+      mediaUrl: "https://res.cloudinary.com/dxaxwiqat/video/upload/v1770392023/WhatsApp_Video_2026-02-06_at_15.19.12_kk8v73.mp4",
+      externalUrl: "www.iufme.com",
+      createdAt: "2024-02-01T14:30:00.000Z",
+      updatedAt: "2024-02-01T14:30:00.000Z",
+  },
+  ],
   lucas: [],
   amelie: [],
 };
