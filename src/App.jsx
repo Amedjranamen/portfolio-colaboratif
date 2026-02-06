@@ -40,7 +40,7 @@ const MEMBERS = [
     name: "MOUNGONGA KOUMBA Dani-Thérence",
     role: "Développeur ",
     email: "lucas@equipe.com",
-    photo: "",
+    photo: "/members/WhatsApp Image 2026-02-06 at 17.50.19.jpeg",
     profile: "Architecte full-stack capable de gérer l'ensemble d'un projet, de la base de données à l'interface. Passionné par les solutions scalables.",
     skills: ["Python", "Django", "React", "PostgreSQL", "AWS", "Docker", "API REST"],
   },
@@ -89,7 +89,16 @@ const INITIAL_PROJECTS = {
       updatedAt: "2024-02-01T14:30:00.000Z",
   },
   ],
-  lucas: [],
+  lucas: [
+     {   id: "proj-4",
+      title: "GES",
+      description: "Cette application permet de gérer efficacement les informations des étudiants. Elle centralise les données académiques, administratives et personnelles. Les utilisateurs peuvent ajouter, modifier et consulter les dossiers étudiants. L’interface est simple, moderne et intuitive. L’application facilite l’organisation et le suivi académique.",
+      mediaUrl: "https://res.cloudinary.com/dxaxwiqat/video/upload/v1770398189/WhatsApp_Video_2026-02-06_at_18.04.53_lhvdyk.mp4",
+      externalUrl: "",
+      createdAt: "2024-02-01T14:30:00.000Z",
+      updatedAt: "2024-02-01T14:30:00.000Z",
+  },
+  ],
   amelie: [],
 };
 
