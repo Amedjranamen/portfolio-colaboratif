@@ -4,7 +4,7 @@ import {
   collection,
   deleteDoc,
   doc,
-  getDocs,
+  onSnapshot,
   updateDoc,
 } from "firebase/firestore";
 import {
@@ -112,37 +112,30 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const fetchAllProjects = async () => {
-      const data = {};
-      await Promise.all(
-        MEMBERS.map(async (member) => {
-          const snapshot = await getDocs(
-            collection(db, "members", member.id, "projects")
-          );
-          data[member.id] = snapshot.docs.map((docSnap) => ({
-            id: docSnap.id,
-            ...docSnap.data(),
+    const unsubscribers = MEMBERS.map((member) => {
+      return onSnapshot(
+        collection(db, "members", member.id, "projects"),
+        (snapshot) => {
+          setProjectsByMember((prev) => ({
+            ...prev,
+            [member.id]: snapshot.docs.map((docSnap) => ({
+              id: docSnap.id,
+              ...docSnap.data(),
+            })),
           }));
-        })
+        },
+        (error) => {
+          console.error("Firestore error:", error);
+        }
       );
-      setProjectsByMember(data);
-    };
+    });
 
-    fetchAllProjects();
+    return () => unsubscribers.forEach((unsub) => unsub());
   }, []);
 
-  const refreshMemberProjects = async (memberId) => {
-    const snapshot = await getDocs(
-      collection(db, "members", memberId, "projects")
-    );
-    const projects = snapshot.docs.map((docSnap) => ({
-      id: docSnap.id,
-      ...docSnap.data(),
-    }));
-    setProjectsByMember((prev) => ({
-      ...prev,
-      [memberId]: projects,
-    }));
+  const refreshMemberProjects = (memberId) => {
+    // No-op: onSnapshot handles real-time updates automatically
+    console.log("Projects auto-updated via onSnapshot");
   };
 
   const handleAuthSubmit = async (event) => {
@@ -220,7 +213,6 @@ export default function App() {
         });
       }
 
-      await refreshMemberProjects(currentMember.id);
       setFormData(emptyForm);
       setEditingId(null);
     } catch (error) {
