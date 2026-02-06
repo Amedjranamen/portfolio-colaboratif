@@ -13,8 +13,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { auth, db, storage } from "./firebase";
+import { auth, db } from "./firebase";
 
 const MEMBERS = [
   {
@@ -181,10 +180,31 @@ export default function App() {
   };
 
   const uploadFile = async (file, memberId) => {
-    const fileName = `${Date.now()}_${file.name}`;
-    const storageRef = ref(storage, `members/${memberId}/projects/${fileName}`);
-    await uploadBytes(storageRef, file);
-    return getDownloadURL(storageRef);
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+    if (!cloudName || !uploadPreset) {
+      throw new Error("Missing Cloudinary env vars");
+    }
+
+    const url = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
+    const form = new FormData();
+    form.append("file", file);
+    form.append("upload_preset", uploadPreset);
+    form.append("folder", `teamfolio/${memberId}`);
+
+    const res = await fetch(url, {
+      method: "POST",
+      body: form,
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Cloudinary upload failed");
+    }
+
+    const data = await res.json();
+    return data.secure_url;
   };
 
   const handleProjectSubmit = async (event) => {
@@ -225,7 +245,9 @@ export default function App() {
       setSelectedFile(null);
     } catch (error) {
       console.error("Erreur upload:", error);
-      alert("Erreur lors de l'upload du fichier. Vérifiez Firebase Storage.");
+      alert(
+        "Erreur lors de l'upload du fichier. Vérifiez Cloudinary (upload preset unsigned + env)."
+      );
     } finally {
       setUploading(false);
     }
